@@ -17,10 +17,12 @@ namespace HttpClientSample.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IWeatherForecastClient _weatherForecastClient;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IWeatherForecastClient weatherForecastClient)
         {
             _logger = logger;
+            _weatherForecastClient = weatherForecastClient ?? throw new ArgumentNullException(nameof(weatherForecastClient));
         }
 
         [HttpGet]
@@ -34,6 +36,18 @@ namespace HttpClientSample.Controllers
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        [HttpGet("AddWeatherForecastAsync")]
+        public async Task AddWeatherForecastAsync()
+        {
+            var weatherForecast = new WeatherForecast
+            {
+                Date = DateTime.Now,
+                TemperatureC = 55,
+                Summary = "Scorching"
+            };
+            await _weatherForecastClient.AddWeatherForecastAsync(weatherForecast, HttpContext.RequestAborted);
         }
     }
 }
